@@ -21,12 +21,15 @@ def main():
         query = input()
 
         processor = QueryProcessor(query, data)
-        processor.process_query()
+        search_results = processor.process_query()
+        # print(processor.individual_doc_vectors.get(1))
         # process query
             #
             #
             #
         print("Here are your search results:")
+        for doc in search_results:
+            print(f'\t{data.get_title(doc[1])}')
         sleep(3)
         print("\n\nWould you like to make another query? [Y/n]")
         another = ''

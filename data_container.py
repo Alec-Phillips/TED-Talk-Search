@@ -43,6 +43,9 @@ class DataContainer:
     def __init__(self):
         self.data = {}
 
+    def get_title(self, id):
+        return self.data.get(id).title
+
     def read_data(self):
         columns = []
         rows = []
