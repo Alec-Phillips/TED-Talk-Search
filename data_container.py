@@ -32,9 +32,12 @@ class DataPoint:
                 self.transcript = transcript
                 self.vector = []
 
-    def set_vector(self):
+    def set_vector(self, vector):
         # set the tf-idf vector for the description of this ted-talk
-        pass
+        self.vector = vector
+
+    def get_vector(self):
+        return self.vector
 
 
 
@@ -143,3 +146,5 @@ class DataContainer:
         new_list[0] = ' ' + new_list[0]
         new_list = [item[2:-1] for item in new_list]
         return new_list
+
+
