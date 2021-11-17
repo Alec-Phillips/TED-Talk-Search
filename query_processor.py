@@ -30,7 +30,7 @@ class QueryProcessor:
         for id, doc in self.data_container.data.items():
             # print(id)
             self.id_list.append(id)
-            words = word_tokenize(doc.description)
+            words = word_tokenize(doc.transcript)
             words = [word.lower() for word in words if word not in stopwords]
             stems = [stemmer.stem(word) for word in words]
             for term in set(stems):
@@ -50,7 +50,7 @@ class QueryProcessor:
         print('\t- Creating Centroid Vector for each Document...\n\t   - this takes about a minute')
         for id, doc in self.data_container.data.items():
             term_vectors = []
-            words = word_tokenize(doc.description)
+            words = word_tokenize(doc.transcript)
             words = [word.lower() for word in words if word not in stopwords]
             stems = [stemmer.stem(word) for word in words]
             for term in set(stems):
@@ -121,7 +121,10 @@ class QueryProcessor:
     def cosine_similarity(self, v1, v2):
         numerator = self.dot_product(v1, v2)
         denominator = self.cosine_denominator(v1, v2)
-        return numerator / denominator
+        if denominator == 0:
+            return 0
+        else:
+            return numerator / denominator
 
     def dot_product(self, v1, v2):
         sum = 0
