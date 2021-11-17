@@ -96,7 +96,12 @@ class QueryProcessor:
     def idf(self, term):
         return math.log10(self.num_docs / len(self.term_frequencies.get(term).keys()))
 
-
+    def read_pre_train_data(self, fp):
+        data = json.load(fp)
+        for id, vec in data.items():
+            # print(type(vec[0]))
+            # break
+            self.data_container.data.get(int(id)).set_vector(vec)
 
     def process_query(self, query):
         print('\nProcessing Your Query...')

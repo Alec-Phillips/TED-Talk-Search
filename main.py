@@ -25,13 +25,18 @@ pre_training_path = os.path.relpath('pre_training_json.txt', cur_path)
 # with open(pre_training_path, 'w') as outfile:
 #     processor.train(outfile)
 # outfile.close()
-with open(pre_training_path, 'rb') as f_in:
-    with gzip.open(pre_training_path + '.gz', 'wb') as f_out:
-        shutil.copyfileobj(f_in, f_out)
-# f = open(pre_training_path)
-# content = f.read()
-# with gzip.open(pre_training_path, 'wb') as f:
-#     f.write(content)
+# with open(pre_training_path, 'rb') as f_in:
+#     with gzip.open(pre_training_path + '.gz', 'wb') as f_out:
+#         shutil.copyfileobj(f_in, f_out)
+with gzip.open(pre_training_path + '.gz', 'rb') as f:
+    pre_training_data = f.read()
+f.close()
+with open(pre_training_path, 'wb') as outfile:
+    outfile.write(pre_training_data)
+outfile.close()
+f = open(pre_training_path, 'r')
+processor.read_pre_train_data(f)
+f.close()
 
 def main():
     while True:
@@ -59,5 +64,5 @@ def main():
             break
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
