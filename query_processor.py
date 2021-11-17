@@ -35,7 +35,7 @@ class QueryProcessor:
         self.full_doc_corpus = []
         self.individual_doc_vectors = {}
 
-    def train(self, fp):
+    def train(self, fp_1, fp_2):
         print('\n[Training Model...]')
         print('\t- Learning Term Frequencies...')
         term_set = set()
@@ -86,7 +86,8 @@ class QueryProcessor:
                 centroid[i] = centroid[i] / len(term_vectors)
             doc.set_vector(centroid)
             self.individual_doc_vectors[id] = centroid
-        json.dump(self.individual_doc_vectors, fp)
+        json.dump(self.individual_doc_vectors, fp_1)
+        json.dump(self.term_list, fp_2)
         print('[Done Training]')
 
 
@@ -96,12 +97,14 @@ class QueryProcessor:
     def idf(self, term):
         return math.log10(self.num_docs / len(self.term_frequencies.get(term).keys()))
 
-    def read_pre_train_data(self, fp):
-        data = json.load(fp)
+    def read_pre_train_data(self, fp_1, fp_2):
+        data = json.load(fp_1)
         for id, vec in data.items():
             # print(type(vec[0]))
             # break
             self.data_container.data.get(int(id)).set_vector(vec)
+        terms = json.load(fp_2)
+        self.term_list = terms
 
     def process_query(self, query):
         print('\nProcessing Your Query...')
