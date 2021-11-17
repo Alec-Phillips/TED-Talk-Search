@@ -36,7 +36,7 @@ class QueryProcessor:
 
     def train(self):
         print('\n[Training Model...]')
-        print('\t- Learning Term Frequencies...]')
+        print('\t- Learning Term Frequencies...')
         term_set = set()
         for id, doc in self.data_container.data.items():
             # print(id)
@@ -52,13 +52,13 @@ class QueryProcessor:
                     self.term_frequencies[term][id] = words.count(term)
         for term in term_set:
             self.term_list.append(term)
-        print('\t- Computing TF-IDF for each term...]')
+        print('\t- Computing TF-IDF for each term...')
         for term, docs in self.term_frequencies.items():
             self.tf_idf_table[term] = {}
             for id, count in docs.items():
                 term_tf_idf = self.tf(count) * self.idf(term)
                 self.tf_idf_table[term][id] = term_tf_idf
-        print('\t- Creating Centroid Vector for each Document...]\n\t   - this takes about a minute')
+        print('\t- Creating Centroid Vector for each Document...\n\t   - this takes about a minute')
         for id, doc in self.data_container.data.items():
             term_vectors = []
             words = word_tokenize(doc.description)
@@ -96,7 +96,7 @@ class QueryProcessor:
 
 
     def process_query(self, query):
-        print('[Processing Your Query...]')
+        print('\nProcessing Your Query...')
         term_vectors = []
         words = word_tokenize(query)
         words = [word.lower() for word in words if word not in stopwords]
@@ -106,6 +106,8 @@ class QueryProcessor:
             if term in self.term_vectors:
                 curr_term_vector = self.term_vectors.get(term)
             else:
+                if term not in self.tf_idf_table:
+                    continue
                 for doc_id in self.id_list:
                     if doc_id in self.tf_idf_table.get(term):
                         curr_term_vector.append(self.tf_idf_table.get(term).get(doc_id))
@@ -113,6 +115,8 @@ class QueryProcessor:
                         curr_term_vector.append(0)
                 self.term_vectors[term] = curr_term_vector
             term_vectors.append(curr_term_vector)
+        if term_vectors == []:
+            return []
         query_vector = [0] * len(self.id_list)
         for vector in term_vectors:
             for i in range(len(query_vector)):

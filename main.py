@@ -2,6 +2,7 @@
 run this file to interact with the search engine system
 """
 
+from re import search
 from time import sleep
 from importlib import reload
 import data_container
@@ -28,9 +29,12 @@ def main():
             #
             #
             #
-        print("\nHere are your search results:")
-        for doc in search_results:
-            print(f'\t- talk id: {doc[1]}, title: {data.get_title(doc[1])}')
+        if search_results == []:
+            print('\nSorry, there were no matches to your query')
+        else:
+            print("\nHere are your search results:")
+            for doc in search_results:
+                print(f'\t- talk id: {doc[1]}, title: {data.get_title(doc[1])}')
         sleep(3)
         print("\n\nWould you like to make another query? [Y/n]")
         another = ''
