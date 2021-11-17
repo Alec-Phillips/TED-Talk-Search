@@ -3,6 +3,9 @@ run this file to interact with the search engine system
 """
 
 from re import search
+import os
+import gzip
+import shutil
 from time import sleep
 from importlib import reload
 import data_container
@@ -16,7 +19,19 @@ data = DataContainer()
 data.read_data()
 
 processor = QueryProcessor(data)
-processor.train()
+
+cur_path = os.path.dirname(__file__)
+pre_training_path = os.path.relpath('pre_training_json.txt', cur_path)
+# with open(pre_training_path, 'w') as outfile:
+#     processor.train(outfile)
+# outfile.close()
+with open(pre_training_path, 'rb') as f_in:
+    with gzip.open(pre_training_path + '.gz', 'wb') as f_out:
+        shutil.copyfileobj(f_in, f_out)
+# f = open(pre_training_path)
+# content = f.read()
+# with gzip.open(pre_training_path, 'wb') as f:
+#     f.write(content)
 
 def main():
     while True:
@@ -44,5 +59,5 @@ def main():
             break
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

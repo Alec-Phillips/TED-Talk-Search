@@ -6,6 +6,7 @@ from sklearn.pipeline import Pipeline
 
 import nltk
 import math
+import json
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -34,12 +35,12 @@ class QueryProcessor:
         self.full_doc_corpus = []
         self.individual_doc_vectors = {}
 
-    def train(self):
+    def train(self, fp):
         print('\n[Training Model...]')
         print('\t- Learning Term Frequencies...')
         term_set = set()
         for id, doc in self.data_container.data.items():
-            # print(id)
+            print(id)
             self.id_list.append(id)
             words = word_tokenize(doc.description)
             words = [word.lower() for word in words if word not in stopwords]
@@ -60,6 +61,7 @@ class QueryProcessor:
                 self.tf_idf_table[term][id] = term_tf_idf
         print('\t- Creating Centroid Vector for each Document...\n\t   - this takes about a minute')
         for id, doc in self.data_container.data.items():
+            print(id)
             term_vectors = []
             words = word_tokenize(doc.description)
             words = [word.lower() for word in words if word not in stopwords]
@@ -83,7 +85,8 @@ class QueryProcessor:
             for i in range(len(centroid)):
                 centroid[i] = centroid[i] / len(term_vectors)
             doc.set_vector(centroid)
-
+            self.individual_doc_vectors[id] = centroid
+        json.dump(self.individual_doc_vectors, fp)
         print('[Done Training]')
 
 
