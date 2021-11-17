@@ -1,8 +1,3 @@
-import sklearn
-
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.pipeline import Pipeline
 
 import nltk
 import math
@@ -27,12 +22,6 @@ class QueryProcessor:
         self.term_list = []
         self.id_list = []
         self.term_vectors = {}
-        
-        
-        self.tokenized_query = []
-        self.query_vector = []
-        self.full_doc_corpus = []
-        self.individual_doc_vectors = {}
 
     def train(self):
         print('\n[Training Model...]')
@@ -128,30 +117,6 @@ class QueryProcessor:
             similarities.append((self.cosine_similarity(doc.get_vector(), query_vector), id))
         similarities.sort(key=lambda x:x[0], reverse=True)
         return similarities[:10]
-        
-
-    #     # initialize query vector and doc vectors
-    #     self.tokenized_query = word_tokenize(self.query.lower())
-    #     for key, doc in self.data_container.data.items():
-    #         self.full_doc_corpus.append(doc.description.lower())
-    #         curr_corpus = doc.transcript.lower()
-    #         new_pipe = Pipeline([('count', CountVectorizer(vocabulary=self.tokenized_query)),
-    #               ('tfid', TfidfTransformer())]).fit([curr_corpus])
-    #         new_vector = new_pipe['tfid'].idf_
-    #         # print(new_vector)
-    #         self.individual_doc_vectors[key] = new_vector
-    #     pipe = Pipeline([('count', CountVectorizer(vocabulary=self.tokenized_query)),
-    #               ('tfid', TfidfTransformer())]).fit(self.full_doc_corpus)
-    #     self.query_vector = pipe['tfid'].idf_
-    #     # print(self.query_vector)
-
-    #     similarities = []
-    #     for ind, vec in self.individual_doc_vectors.items():
-    #         similarity = self.cosine_similarity(vec, self.query_vector)
-    #         similarities.append((similarity, ind))
-        
-    #     similarities.sort(key=lambda x:x[0], reverse=True)
-    #     return similarities[:10]
 
     def cosine_similarity(self, v1, v2):
         numerator = self.dot_product(v1, v2)
