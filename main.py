@@ -28,9 +28,9 @@ pre_training_path_3 = os.path.relpath('tf_idf_table_json.txt', cur_path)
 #         with open(pre_training_path_3, 'w') as outfile_3:
 #             processor.train(outfile_1, outfile_2, outfile_3)
 
-with open(pre_training_path_1, 'r') as infile_1:
-    with open(pre_training_path_2, 'r') as infile_2:
-        with open(pre_training_path_3, 'r') as infile_3:
+with open(pre_training_path_1, 'r', encoding='utf8') as infile_1:
+    with open(pre_training_path_2, 'r', encoding='utf8') as infile_2:
+        with open(pre_training_path_3, 'r', encoding='utf8') as infile_3:
             processor.read_pre_train_data(infile_1, infile_2, infile_3)
 
 # outfile.close()

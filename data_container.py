@@ -52,7 +52,7 @@ class DataContainer:
     def read_data(self):
         columns = []
         rows = []
-        with open('ted_talks_en.csv', 'r') as csvfile:
+        with open('ted_talks_en.csv', 'r', encoding='utf8') as csvfile:
             csvreader = csv.reader(csvfile)
             columns = next(csvreader)
             for row in csvreader:
