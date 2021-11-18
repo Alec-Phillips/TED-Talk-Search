@@ -34,6 +34,14 @@ class QueryProcessor:
             self.id_list.append(id)
             words = word_tokenize(doc.transcript)
             words = [word.lower() for word in words if word not in stopwords]
+
+            topics = [topic for topic in doc.topics]
+            words += topics
+
+            desc = word_tokenize(doc.description)
+            desc = [word.lower() for word in desc if word not in stopwords]
+            words += desc
+
             stems = [stemmer.stem(word) for word in words]
             for term in set(stems):
                 term_set.add(term)
@@ -55,6 +63,14 @@ class QueryProcessor:
             term_vectors = []
             words = word_tokenize(doc.transcript)
             words = [word.lower() for word in words if word not in stopwords]
+
+            topics = [topic for topic in doc.topics]
+            words += topics
+
+            desc = word_tokenize(doc.description)
+            desc = [word.lower() for word in desc if word not in stopwords]
+            words += desc
+
             stems = [stemmer.stem(word) for word in words]
             for term in set(stems):
                 curr_term_vector = []
