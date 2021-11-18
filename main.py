@@ -2,7 +2,6 @@
 run this file to interact with the search engine system
 """
 
-from re import search
 import os
 import gzip
 import shutil
@@ -22,10 +21,18 @@ processor = QueryProcessor(data)
 
 cur_path = os.path.dirname(__file__)
 pre_training_path_1 = os.path.relpath('doc_vectors_json.txt', cur_path)
-pre_training_path_2 = os.path.relpath('term_list_json.txt', cur_path)
-with open(pre_training_path_1, 'w') as outfile_1:
-    with open(pre_training_path_2, 'w') as outfile_2:
-        processor.train(outfile_1, outfile_2)
+pre_training_path_2 = os.path.relpath('id_list_json.txt', cur_path)
+pre_training_path_3 = os.path.relpath('tf_idf_table_json.txt', cur_path)
+# with open(pre_training_path_1, 'w') as outfile_1:
+#     with open(pre_training_path_2, 'w') as outfile_2:
+#         with open(pre_training_path_3, 'w') as outfile_3:
+#             processor.train(outfile_1, outfile_2, outfile_3)
+
+with open(pre_training_path_1, 'r') as infile_1:
+    with open(pre_training_path_2, 'r') as infile_2:
+        with open(pre_training_path_3, 'r') as infile_3:
+            processor.read_pre_train_data(infile_1, infile_2, infile_3)
+
 # outfile.close()
 # with open(pre_training_path, 'rb') as f_in:
 #     with gzip.open(pre_training_path + '.gz', 'wb') as f_out:

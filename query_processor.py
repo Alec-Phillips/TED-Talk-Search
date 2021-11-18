@@ -1,8 +1,3 @@
-import sklearn
-
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.pipeline import Pipeline
 
 import nltk
 import math
@@ -23,26 +18,21 @@ class QueryProcessor:
         self.query = ''
         self.data_container = data_container
         self.term_frequencies = {} # { term : { doc : frequency } }
-        self.tf_idf_table = {} # { term : { doc : tf-idf val } }
+        self.tf_idf_table = {} # { term : { doc : tf-idf val } } NEED THIS
         self.num_docs = len(data_container.data.keys())
         self.term_list = []
-        self.id_list = []
-        self.term_vectors = {}
-        
-        
-        self.tokenized_query = []
-        self.query_vector = []
-        self.full_doc_corpus = []
-        self.individual_doc_vectors = {}
+        self.id_list = []   # NEED THIS
+        self.term_vectors = {}  
+        self.individual_doc_vectors = {}    # NEED THIS
 
-    def train(self, fp_1, fp_2):
+    def train(self, fp_1, fp_2, fp_3):
         print('\n[Training Model...]')
         print('\t- Learning Term Frequencies...')
         term_set = set()
         for id, doc in self.data_container.data.items():
             print(id)
             self.id_list.append(id)
-            words = word_tokenize(doc.description)
+            words = word_tokenize(doc.transcript)
             words = [word.lower() for word in words if word not in stopwords]
             stems = [stemmer.stem(word) for word in words]
             for term in set(stems):
@@ -63,7 +53,7 @@ class QueryProcessor:
         for id, doc in self.data_container.data.items():
             print(id)
             term_vectors = []
-            words = word_tokenize(doc.description)
+            words = word_tokenize(doc.transcript)
             words = [word.lower() for word in words if word not in stopwords]
             stems = [stemmer.stem(word) for word in words]
             for term in set(stems):
@@ -87,9 +77,9 @@ class QueryProcessor:
             doc.set_vector(centroid)
             self.individual_doc_vectors[id] = centroid
         json.dump(self.individual_doc_vectors, fp_1)
-        json.dump(self.term_list, fp_2)
+        json.dump(self.id_list, fp_2)
+        json.dump(self.tf_idf_table, fp_3)
         print('[Done Training]')
-
 
     def tf(self, term_count):
         return math.log10(term_count + 1)
@@ -97,14 +87,17 @@ class QueryProcessor:
     def idf(self, term):
         return math.log10(self.num_docs / len(self.term_frequencies.get(term).keys()))
 
-    def read_pre_train_data(self, fp_1, fp_2):
+    def read_pre_train_data(self, fp_1, fp_2, fp_3):
         data = json.load(fp_1)
         for id, vec in data.items():
             # print(type(vec[0]))
             # break
             self.data_container.data.get(int(id)).set_vector(vec)
-        terms = json.load(fp_2)
-        self.term_list = terms
+        ids = json.load(fp_2)
+        self.id_list = ids
+        self.tf_idf_table = json.load(fp_3)
+
+        
 
     def process_query(self, query):
         print('\nProcessing Your Query...')
@@ -120,9 +113,14 @@ class QueryProcessor:
                 if term not in self.tf_idf_table:
                     continue
                 for doc_id in self.id_list:
-                    if doc_id in self.tf_idf_table.get(term):
-                        curr_term_vector.append(self.tf_idf_table.get(term).get(doc_id))
+                    # print(type(doc_id))
+                    if str(doc_id) in self.tf_idf_table.get(term):
+                        # print('here')
+                        curr_term_vector.append(self.tf_idf_table.get(term).get(str(doc_id)))
+                        # print(self.tf_idf_table.get(term).get(str(doc_id)))
+                        # print(type(self.tf_idf_table.get(term).get(str(doc_id))))
                     else:
+                        # print('uhoh')
                         curr_term_vector.append(0)
                 self.term_vectors[term] = curr_term_vector
             term_vectors.append(curr_term_vector)
@@ -139,35 +137,14 @@ class QueryProcessor:
             similarities.append((self.cosine_similarity(doc.get_vector(), query_vector), id))
         similarities.sort(key=lambda x:x[0], reverse=True)
         return similarities[:10]
-        
-
-    #     # initialize query vector and doc vectors
-    #     self.tokenized_query = word_tokenize(self.query.lower())
-    #     for key, doc in self.data_container.data.items():
-    #         self.full_doc_corpus.append(doc.description.lower())
-    #         curr_corpus = doc.transcript.lower()
-    #         new_pipe = Pipeline([('count', CountVectorizer(vocabulary=self.tokenized_query)),
-    #               ('tfid', TfidfTransformer())]).fit([curr_corpus])
-    #         new_vector = new_pipe['tfid'].idf_
-    #         # print(new_vector)
-    #         self.individual_doc_vectors[key] = new_vector
-    #     pipe = Pipeline([('count', CountVectorizer(vocabulary=self.tokenized_query)),
-    #               ('tfid', TfidfTransformer())]).fit(self.full_doc_corpus)
-    #     self.query_vector = pipe['tfid'].idf_
-    #     # print(self.query_vector)
-
-    #     similarities = []
-    #     for ind, vec in self.individual_doc_vectors.items():
-    #         similarity = self.cosine_similarity(vec, self.query_vector)
-    #         similarities.append((similarity, ind))
-        
-    #     similarities.sort(key=lambda x:x[0], reverse=True)
-    #     return similarities[:10]
 
     def cosine_similarity(self, v1, v2):
         numerator = self.dot_product(v1, v2)
         denominator = self.cosine_denominator(v1, v2)
-        return numerator / denominator
+        if denominator == 0:
+            return 0
+        else:
+            return numerator / denominator
 
     def dot_product(self, v1, v2):
         sum = 0
@@ -183,12 +160,3 @@ class QueryProcessor:
         for x in v2:
             sum2 += (x**2)
         return math.sqrt(sum1) * math.sqrt(sum2)
-
-
-        
-
-
-
-
-
-

@@ -146,5 +146,3 @@ class DataContainer:
         new_list[0] = ' ' + new_list[0]
         new_list = [item[2:-1] for item in new_list]
         return new_list
-
-
