@@ -2,9 +2,10 @@
 import nltk
 import math
 import json
+import spacy
 
-nltk.download('punkt')
-nltk.download('stopwords')
+#nltk.download('punkt')
+#nltk.download('stopwords')
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 stopwords = stopwords.words('english')
@@ -181,7 +182,7 @@ class QueryProcessor:
         relevant_entries = []
         for similarity in similarities:
             if similarity[0] == 0 and len(relevant_entries) == 0: # no relevant entries - max cos similarity is 0
-                return relevant_entries
+                return self.topic_search(query)
             elif similarity[0] > 0: # at least one nontrivial match
                 relevant_entries.append(similarity)
 
@@ -189,6 +190,56 @@ class QueryProcessor:
         relevant_entries.sort(key=lambda x:x[0], reverse=True)
 
         return relevant_entries[:10] # at this point, already taken care of the case where len(relevant_entries) == 0
+
+    def topic_search(self, query):
+
+        # get the root of the query
+        # find nsubj that depends on root
+        # search: for topic in topics, see if nsubj in topic
+        # aggregate all talks and return list of best talks
+        en_nlp = spacy.load("en_core_web_sm")
+
+        doc = en_nlp(query)
+        query_nsubj = "FIXME"
+        query_root = "FIXME"
+        query_term = "FIXME"
+
+        # base case: len(query) == 1
+        if " " not in query.strip():
+            query_nsubj = query
+        else:
+            for word in doc:
+                if word.dep_ == "nsubj":
+                    query_nsubj = str(word.text)
+                if word.dep_ == "ROOT":
+                    query_root = str(word.text)
+                if query_nsubj != "FIXME" and query_root != "FIXME":
+                    # FIXME
+                    break
+
+        for word in doc:
+            print(word.dep_)
+        print("nsubj ", query_nsubj)
+        print("root ", query_root)
+
+        # decide whether or not the key term is root or nsubj
+        # if nsubj is available, use that
+        # otherwise, default to root
+        query_term = query_root if query_nsubj == "FIXME" else query_nsubj
+
+        talks = []
+
+        for id, document in self.data_container.data.items():
+            if query_term in document.topics:
+                talks.append((None, id))
+
+        # filter talks by most popular
+        # if len(talks) > 10, sort talks by popular and return top 10
+        if len(talks) <= 10:
+            return talks
+        else:
+            talks.sort(key=lambda x:self.data_container.data.get(x[1]).views, reverse=True)
+            return talks[:10]
 
     def cosine_similarity(self, v1, v2):
         numerator = self.dot_product(v1, v2)
