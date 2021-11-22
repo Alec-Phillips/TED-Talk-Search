@@ -199,36 +199,35 @@ class QueryProcessor:
         # aggregate all talks and return list of best talks
         en_nlp = spacy.load("en_core_web_sm")
 
-        doc = en_nlp(query)
-        query_nsubj = "FIXME"
-        query_root = "FIXME"
-        query_term = "FIXME"
+        doc = en_nlp(query) # query is a string which comes directly from user input
+        query_nsubj = ""
+        query_root = ""
+        query_term = ""
 
         # base case: len(query) == 1
         if " " not in query.strip():
             query_nsubj = query
+
+        # general case: query is a multiple-word user input
+        # use word.text from spacy's word token
+        # https://stackoverflow.com/questions/62786554/got-argument-other-has-incorrect-type-expected-spacy-tokens-token-token-got
         else:
             for word in doc:
                 if word.dep_ == "nsubj":
                     query_nsubj = str(word.text)
                 if word.dep_ == "ROOT":
                     query_root = str(word.text)
-                if query_nsubj != "FIXME" and query_root != "FIXME":
-                    # FIXME
+                if query_nsubj != "" and query_root != "":
                     break
-
-        for word in doc:
-            print(word.dep_)
-        print("nsubj ", query_nsubj)
-        print("root ", query_root)
 
         # decide whether or not the key term is root or nsubj
         # if nsubj is available, use that
         # otherwise, default to root
-        query_term = query_root if query_nsubj == "FIXME" else query_nsubj
+        query_term = query_root if query_nsubj == "" else query_nsubj
 
         talks = []
 
+        # pass in appropriate format of (cos_similarity, id) - here, cos similarity is 0, so use None
         for id, document in self.data_container.data.items():
             if query_term in document.topics:
                 talks.append((None, id))
