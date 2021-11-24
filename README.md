@@ -14,7 +14,7 @@
 
 ## Constraints:
 - The TF-IDF process squashes the importance of terms that appear more often, so queries for certain terms that occur throughout a very large number of the talks end up being uninformative and don't return helpful results
-  - For instance, the vector for a query for 'culture' will just be represented by all 0's, because climate appears so frequently in the different Ted Talks
+  - For instance, the vector for a query for 'culture' will just be represented by all 0's, because the term appears so frequently in the different Ted Talks
   - Because of this, the cosine similarity will get the same result when comparing this query to each document
 - To address this issue, we implemented a secondary search strategy that uses the 'topics' column of the dataset:
   - In the case that the query is too general, we use dependency parsing to determine the nominative subject (or just root, if there is no subject), and we search through the 'topics' list for matching talks
