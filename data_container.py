@@ -55,7 +55,7 @@ class DataContainer:
         return self.data.get(id).title
 
     def get_speaker(self, id):
-        return self.data.get(id).speaker
+        return self.data.get(id).speaker_1
 
     def get_url(self, id):
         return self.data.get(id).url

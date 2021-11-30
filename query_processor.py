@@ -174,15 +174,6 @@ class QueryProcessor:
         # check to make sure that cos similarity is nontrivial
         # in the trivial case, let the user know that there is no match
 
-        """
-        count = 0
-        for similarity in similarities:
-            print(similarity)
-            count += 1
-            if count > 10:
-                break
-        """
-        
         # if there are no relevant entries (i.e., all cos similarities == 0)
         # tell the user there is no match
         # if there is at least 1 relevant entry, return it
@@ -213,7 +204,7 @@ class QueryProcessor:
         query_root = ""
         query_term = ""
 
-        # base case: len(query) == 1
+        # simple case: len(query) == 1
         if " " not in query.strip():
             query_nsubj = query
 

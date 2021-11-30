@@ -42,7 +42,7 @@ def main():
         else:
             print("\nHere are your search results:")
             for i, doc in enumerate(search_results):
-                print(f'\t{i} - speaker: {data.get_speaker(doc[1])}, title: {data.get_title(doc[1])}, url: {data.get_url(doc[1])}')
+                print(f'\t{i+1} - speaker: {data.get_speaker(doc[1])}, title: {data.get_title(doc[1])}, url: {data.get_url(doc[1])}')
         sleep(3)
         print("\n\nWould you like to make another query? [Y/n]")
         another = ''
