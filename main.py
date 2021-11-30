@@ -3,8 +3,6 @@ run this file to interact with the search engine system
 """
 
 import os
-import gzip
-import shutil
 from time import sleep
 from importlib import reload
 import data_container
@@ -33,37 +31,18 @@ with open(pre_training_path_1, 'r', encoding='utf8') as infile_1:
         with open(pre_training_path_3, 'r', encoding='utf8') as infile_3:
             processor.read_pre_train_data(infile_1, infile_2, infile_3)
 
-# outfile.close()
-# with open(pre_training_path, 'rb') as f_in:
-#     with gzip.open(pre_training_path + '.gz', 'wb') as f_out:
-#         shutil.copyfileobj(f_in, f_out)
-# with gzip.open(pre_training_path + '.gz', 'rb') as f:
-#     pre_training_data = f.read()
-# f.close()
-# with open(pre_training_path, 'wb') as outfile:
-#     outfile.write(pre_training_data)
-# outfile.close()
-# f = open(pre_training_path, 'r')
-# processor.read_pre_train_data(f)
-# f.close()
 
 def main():
     while True:
         print("Enter a search query:")
         query = input()
-
         search_results = processor.process_query(query)
-        # print(processor.individual_doc_vectors.get(1))
-        # process query
-            #
-            #
-            #
         if search_results == []:
             print('\nSorry, there were no matches to your query')
         else:
             print("\nHere are your search results:")
-            for doc in search_results:
-                print(f'\t- talk id: {doc[1]}, title: {data.get_title(doc[1])}')
+            for i, doc in enumerate(search_results):
+                print(f'\t{i} - speaker: {data.get_speaker(doc[1])}, title: {data.get_title(doc[1])}, url: {data.get_url(doc[1])}')
         sleep(3)
         print("\n\nWould you like to make another query? [Y/n]")
         another = ''
