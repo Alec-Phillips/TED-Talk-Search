@@ -42,12 +42,23 @@ class DataPoint:
 
 
 class DataContainer:
+    """
+    a proxy object to hold all the data
+    although this is basically just an abstraction on the normal dictionary,
+    it makes the data easier to work with and helps the code stay cleaner
+    """
 
     def __init__(self):
         self.data = {}
 
     def get_title(self, id):
         return self.data.get(id).title
+
+    def get_speaker(self, id):
+        return self.data.get(id).speaker_1
+
+    def get_url(self, id):
+        return self.data.get(id).url
 
     def read_data(self):
         columns = []

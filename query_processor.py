@@ -14,6 +14,12 @@ stemmer = PorterStemmer()
 
 
 class QueryProcessor:
+    """
+    This module holds the actual search engine model/code
+    The train function sets up the TF-IDF vectors for each document and reads to txt file
+    Another method for loading in the pre-trained data
+    Finally the method for actually processing the query
+    """
 
     def __init__(self, data_container):
         self.query = ''
@@ -27,6 +33,10 @@ class QueryProcessor:
         self.individual_doc_vectors = {}    # NEED THIS
 
     def train(self, fp_1, fp_2, fp_3):
+        """
+        This method pre-trains by saving the TF-IDF centroid vectors
+        they are stored in json format in txt files
+        """
         print('\n[Training Model...]')
         print('\t- Learning Term Frequencies...')
         term_set = set()
@@ -105,18 +115,22 @@ class QueryProcessor:
         return math.log10(self.num_docs / len(self.term_frequencies.get(term).keys()))
 
     def read_pre_train_data(self, fp_1, fp_2, fp_3):
+        """
+        Reads in the pre-traineed data and sets up the proper member variables
+        so that new queries can be processed
+        """
         data = json.load(fp_1)
         for id, vec in data.items():
-            # print(type(vec[0]))
-            # break
             self.data_container.data.get(int(id)).set_vector(vec)
         ids = json.load(fp_2)
         self.id_list = ids
         self.tf_idf_table = json.load(fp_3)
 
-        
-
     def process_query(self, query):
+        """
+        Vectorizes the query and performs cosine similarity between the query
+        and each document, returning the ten best matches
+        """
         print('\nProcessing Your Query...')
         term_vectors = []
         words = word_tokenize(query)
@@ -131,14 +145,9 @@ class QueryProcessor:
                 if term not in self.tf_idf_table:
                     continue
                 for doc_id in self.id_list:
-                    # print(type(doc_id))
                     if str(doc_id) in self.tf_idf_table.get(term):
-                        # print('here')
                         curr_term_vector.append(self.tf_idf_table.get(term).get(str(doc_id)))
-                        # print(self.tf_idf_table.get(term).get(str(doc_id)))
-                        # print(type(self.tf_idf_table.get(term).get(str(doc_id))))
                     else:
-                        # print('uhoh')
                         curr_term_vector.append(0)
                 self.term_vectors[term] = curr_term_vector
             term_vectors.append(curr_term_vector)
@@ -165,15 +174,6 @@ class QueryProcessor:
         # check to make sure that cos similarity is nontrivial
         # in the trivial case, let the user know that there is no match
 
-        """
-        count = 0
-        for similarity in similarities:
-            print(similarity)
-            count += 1
-            if count > 10:
-                break
-        """
-        
         # if there are no relevant entries (i.e., all cos similarities == 0)
         # tell the user there is no match
         # if there is at least 1 relevant entry, return it
@@ -204,7 +204,7 @@ class QueryProcessor:
         query_root = ""
         query_term = ""
 
-        # base case: len(query) == 1
+        # simple case: len(query) == 1
         if " " not in query.strip():
             query_nsubj = query
 
