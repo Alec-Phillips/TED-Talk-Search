@@ -2,9 +2,10 @@
 import nltk
 import math
 import json
+import spacy
 
-nltk.download('punkt')
-nltk.download('stopwords')
+#nltk.download('punkt')
+#nltk.download('stopwords')
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 stopwords = stopwords.words('english')
@@ -34,6 +35,14 @@ class QueryProcessor:
             self.id_list.append(id)
             words = word_tokenize(doc.transcript)
             words = [word.lower() for word in words if word not in stopwords]
+
+            topics = [topic for topic in doc.topics]
+            words += topics
+
+            desc = word_tokenize(doc.description)
+            desc = [word.lower() for word in desc if word not in stopwords]
+            words += desc
+
             stems = [stemmer.stem(word) for word in words]
             for term in set(stems):
                 term_set.add(term)
@@ -55,6 +64,14 @@ class QueryProcessor:
             term_vectors = []
             words = word_tokenize(doc.transcript)
             words = [word.lower() for word in words if word not in stopwords]
+
+            topics = [topic for topic in doc.topics]
+            words += topics
+
+            desc = word_tokenize(doc.description)
+            desc = [word.lower() for word in desc if word not in stopwords]
+            words += desc
+
             stems = [stemmer.stem(word) for word in words]
             for term in set(stems):
                 curr_term_vector = []
@@ -104,6 +121,7 @@ class QueryProcessor:
         term_vectors = []
         words = word_tokenize(query)
         words = [word.lower() for word in words if word not in stopwords]
+
         stems = [stemmer.stem(word) for word in words]
         for term in set(stems):
             curr_term_vector = []
@@ -134,9 +152,93 @@ class QueryProcessor:
             query_vector[i] = query_vector[i] / len(term_vectors)
         similarities = []
         for id, doc in self.data_container.data.items():
-            similarities.append((self.cosine_similarity(doc.get_vector(), query_vector), id))
+
+            # make sure that the doc appended actually has some similarity
+            # i.e., cos similarity > 0
+            if self.cosine_similarity(doc.get_vector(), query_vector) > 0:
+                similarities.append((self.cosine_similarity(doc.get_vector(), query_vector), id))
+            else:
+                similarities.append((0, id))
+
         similarities.sort(key=lambda x:x[0], reverse=True)
-        return similarities[:10]
+
+        # check to make sure that cos similarity is nontrivial
+        # in the trivial case, let the user know that there is no match
+
+        """
+        count = 0
+        for similarity in similarities:
+            print(similarity)
+            count += 1
+            if count > 10:
+                break
+        """
+        
+        # if there are no relevant entries (i.e., all cos similarities == 0)
+        # tell the user there is no match
+        # if there is at least 1 relevant entry, return it
+        # if there are 10, return all
+
+        relevant_entries = []
+        for similarity in similarities:
+            if similarity[0] == 0 and len(relevant_entries) == 0: # no relevant entries - max cos similarity is 0
+                return self.topic_search(query)
+            elif similarity[0] > 0: # at least one nontrivial match
+                relevant_entries.append(similarity)
+
+        # return 10 most important matches
+        relevant_entries.sort(key=lambda x:x[0], reverse=True)
+
+        return relevant_entries[:10] # at this point, already taken care of the case where len(relevant_entries) == 0
+
+    def topic_search(self, query):
+
+        # get the root of the query
+        # find nsubj that depends on root
+        # search: for topic in topics, see if nsubj in topic
+        # aggregate all talks and return list of best talks
+        en_nlp = spacy.load("en_core_web_sm")
+
+        doc = en_nlp(query) # query is a string which comes directly from user input
+        query_nsubj = ""
+        query_root = ""
+        query_term = ""
+
+        # base case: len(query) == 1
+        if " " not in query.strip():
+            query_nsubj = query
+
+        # general case: query is a multiple-word user input
+        # use word.text from spacy's word token
+        # https://stackoverflow.com/questions/62786554/got-argument-other-has-incorrect-type-expected-spacy-tokens-token-token-got
+        else:
+            for word in doc:
+                if word.dep_ == "nsubj":
+                    query_nsubj = str(word.text)
+                if word.dep_ == "ROOT":
+                    query_root = str(word.text)
+                if query_nsubj != "" and query_root != "":
+                    break
+
+        # decide whether or not the key term is root or nsubj
+        # if nsubj is available, use that
+        # otherwise, default to root
+        query_term = query_root if query_nsubj == "" else query_nsubj
+
+        talks = []
+
+        # pass in appropriate format of (cos_similarity, id) - here, cos similarity is 0, so use None
+        for id, document in self.data_container.data.items():
+            if query_term in document.topics:
+                talks.append((None, id))
+
+        # filter talks by most popular
+        # if len(talks) > 10, sort talks by popular and return top 10
+        if len(talks) <= 10:
+            return talks
+        else:
+            talks.sort(key=lambda x:self.data_container.data.get(x[1]).views, reverse=True)
+            return talks[:10]
 
     def cosine_similarity(self, v1, v2):
         numerator = self.dot_product(v1, v2)
